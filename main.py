@@ -133,8 +133,13 @@ def main() -> None:
         raise ValueError("word must not be only white space")
     if any(ch.isspace() for ch in word):
         raise ValueError("word must be a single word with no white space")
-    if not word.isalpha():
-        raise ValueError("word must be letters only, so it reads instantly")
+    # The gate counts characters (1-99), but the leaderboard's size
+    # column and the exact-tie rule count bytes, so keep both in view:
+    # the word must fit the character gate and stay short in bytes.
+    if len(word.encode("utf-8")) > MAX_CHARS:
+        raise ValueError(
+            f"word is {len(word.encode('utf-8'))} bytes, must be at most {MAX_CHARS}"
+        )
 
     # The harness runs the program in a sandbox where /output exists.
     # OUTPUT_PATH is an override for local runs only; the default is the
@@ -144,11 +149,15 @@ def main() -> None:
     out_path.write_text(word, encoding="utf-8")
 
     # Read the file back and confirm it holds exactly the word: the
-    # gate counts bytes, so a stray newline or encoding slip here would
-    # be the whole entry. Fail loudly locally rather than ship it wrong.
+    # gate counts characters, so a stray newline or encoding slip here
+    # would be the whole entry, and the tie-break counts bytes, so
+    # confirm the byte length on disk too. Fail loudly locally rather
+    # than ship it wrong.
     written = out_path.read_text(encoding="utf-8")
     if written != word:
         raise ValueError(f"wrote {written!r}, expected {word!r}")
+    if len(out_path.read_bytes()) != len(word.encode("utf-8")):
+        raise ValueError("written byte length does not match the word")
 
 
 if __name__ == "__main__":

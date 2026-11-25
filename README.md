@@ -28,8 +28,8 @@ freshness — "uh-oh" is the bounty title and everyone's first reach.
 `main.py` is a deterministic program (no randomness, no clock, no
 network). It holds the drafted candidate words with the head-to-head
 reasoning that picked the winner, validates the word against the
-published gate (UTF-8 text, 1–99 characters, one word, letters only,
-not only white space), writes it to `/output/entry.txt` with no
+published gate (UTF-8 text, 1–99 characters, one word, not only white
+space, and short in bytes too), writes it to `/output/entry.txt` with no
 trailing newline, and reads it back to confirm the file holds exactly
 the word.
 
